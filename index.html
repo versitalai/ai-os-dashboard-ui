@@ -3,562 +3,1010 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI-OS Dashboard — UI Preview</title>
+<title>AI-OS Dashboard</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
   :root {
-    --bg: #0d1117;
-    --bg2: #161b22;
-    --bg3: #21262d;
-    --border: #30363d;
+    --bg: #0a0c10;
+    --bg2: rgba(22, 27, 34, 0.6);
+    --bg3: rgba(33, 38, 45, 0.5);
+    --border: rgba(48, 54, 61, 0.4);
+    --border-hover: rgba(48, 54, 61, 0.7);
     --text: #e6edf3;
     --text2: #8b949e;
+    --text3: #6e7681;
     --green: #3fb950;
+    --green-dim: rgba(63, 185, 80, 0.12);
     --yellow: #d29922;
     --red: #f85149;
     --blue: #58a6ff;
     --purple: #bc8cff;
+    --purple-dim: rgba(188, 140, 255, 0.12);
+    --purple-glow: rgba(188, 140, 255, 0.15);
     --cyan: #39d2c0;
     --orange: #f0883e;
+    --orange-dim: rgba(240, 136, 62, 0.12);
+    --orange-glow: rgba(240, 136, 62, 0.08);
     --pink: #db61a2;
-    --card-radius: 8px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+    --sidebar-w: 220px;
+    --radius: 12px;
+    --radius-sm: 8px;
     --transition: 0.2s ease;
   }
-  html { font-size: 14px; }
+
+  html { font-size: 13px; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: var(--font);
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
+    display: flex;
     line-height: 1.5;
   }
-  .header {
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    min-height: 100vh;
+    background: rgba(13, 17, 23, 0.95);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    z-index: 100;
+  }
+
+  .sidebar-logo {
+    padding: 18px 16px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 700;
     border-bottom: 1px solid var(--border);
-    padding: 16px 24px;
+  }
+  .sidebar-logo .logo-symbol {
+    color: var(--orange);
+    font-size: 1.2rem;
+  }
+
+  .sidebar-nav {
+    padding: 8px;
+    flex: 1;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    color: var(--text2);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: default;
+    transition: all var(--transition);
+    margin-bottom: 2px;
+    text-decoration: none;
+  }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active {
+    background: rgba(88, 166, 255, 0.1);
+    color: var(--blue);
+  }
+  .nav-item .icon { font-size: 1.05rem; width: 20px; text-align: center; }
+
+  .nav-section {
+    padding: 12px 12px 6px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+  }
+
+  .agent-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: default;
+    margin-bottom: 2px;
+    border: 1px solid transparent;
+    transition: all var(--transition);
+  }
+  .agent-btn:hover { background: var(--bg3); }
+  .agent-btn.hermes {
+    background: linear-gradient(135deg, rgba(240,136,62,0.08), rgba(188,140,255,0.08));
+    border-color: rgba(240,136,62,0.2);
+    color: var(--orange);
+  }
+  .agent-btn.openclaw {
+    background: rgba(248,81,73,0.06);
+    border-color: rgba(248,81,73,0.15);
+    color: var(--red);
+  }
+
+  .sidebar-footer {
+    padding: 8px;
+    border-top: 1px solid var(--border);
+  }
+  .sidebar-preview {
+    background: var(--bg3);
+    border-radius: var(--radius-sm);
+    padding: 8px;
+    font-size: 0.7rem;
+    color: var(--text3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sidebar-preview .dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--green);
+    flex-shrink: 0;
+  }
+
+  /* ── MAIN ── */
+  .main {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10, 12, 16, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 50;
     flex-wrap: wrap;
     gap: 8px;
-    background: var(--bg2);
   }
-  .header h1 {
-    font-size: 1.25rem;
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: var(--text2);
+  }
+  .topbar-left .status-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    flex-shrink: 0;
+  }
+  .topbar-left .status-text { color: var(--green); font-weight: 500; }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 0.78rem;
+    color: var(--text3);
+    min-width: 180px;
+  }
+  .search-box .key-hint {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    padding: 1px 5px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text3);
+    margin-left: auto;
+  }
+  .icon-btn {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    cursor: default;
+    font-size: 0.9rem;
+    transition: all var(--transition);
+  }
+  .icon-btn:hover { background: var(--border); }
+  .avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--orange), var(--purple));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; font-weight: 700; color: #fff;
+  }
+
+  /* ── CONTENT ── */
+  .content {
+    padding: 20px 24px;
+    max-width: 1320px;
+  }
+
+  .page-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .page-title .sub {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--text2);
+  }
+
+  /* ── METRIC CARDS ROW ── */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .metric-card {
+    background: var(--bg2);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    transition: all var(--transition);
+  }
+  .metric-card:hover { border-color: var(--border-hover); }
+
+  .metric-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text3);
+    margin-bottom: 4px;
+  }
+  .metric-value {
+    font-size: 1.7rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .metric-value.orange { color: var(--orange); }
+  .metric-value.green { color: var(--green); }
+  .metric-value.purple { color: var(--purple); text-shadow: 0 0 20px var(--purple-glow); }
+
+  .metric-footer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    font-size: 0.75rem;
+    color: var(--text2);
+  }
+  .metric-sparkline {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 24px;
+    margin-top: 8px;
+  }
+  .spark-bar {
+    width: 4px;
+    border-radius: 2px 2px 0 0;
+    transition: height var(--transition);
+  }
+  .spark-bar.orange { background: linear-gradient(to top, rgba(240,136,62,0.3), var(--orange)); }
+  .spark-bar.green { background: linear-gradient(to top, rgba(63,185,80,0.3), var(--green)); }
+  .spark-bar.purple { background: linear-gradient(to top, rgba(188,140,255,0.3), var(--purple)); }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .section-title {
+    font-size: 0.9rem;
     font-weight: 700;
     display: flex;
     align-items: center;
     gap: 8px;
   }
-  .header h1 .logo { color: var(--cyan); }
-  .header-status {
+  .section-tabs {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    color: var(--text2);
-    font-size: 0.85rem;
+    gap: 2px;
+    background: var(--bg3);
+    border-radius: 8px;
+    padding: 2px;
   }
-  .status-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    display: inline-block;
-  }
-  .status-dot.green { background: var(--green); box-shadow: 0 0 6px var(--green); }
-  .status-dot.yellow { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
-  .status-dot.red { background: var(--red); box-shadow: 0 0 6px var(--red); }
-  .last-refresh { font-size: 0.75rem; color: var(--text2); }
-
-  .container { max-width: 1440px; margin: 0 auto; padding: 16px; }
-  .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 12px; }
-
-  .card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--card-radius);
-    padding: 16px;
-    overflow: hidden;
-  }
-  .card-title {
+  .section-tab {
+    padding: 5px 14px;
+    border-radius: 6px;
     font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    font-weight: 500;
     color: var(--text2);
-    margin-bottom: 12px;
+    cursor: default;
+    transition: all var(--transition);
+  }
+  .section-tab:hover { color: var(--text); }
+  .section-tab.active {
+    background: var(--bg2);
+    color: var(--text);
+    backdrop-filter: blur(8px);
+  }
+  .section-summary {
+    display: flex;
+    gap: 16px;
+    font-size: 0.75rem;
+    color: var(--text2);
+    margin-bottom: 14px;
+  }
+  .section-summary span strong { color: var(--text); }
+
+  /* ── SUBSCRIPTION CARDS ── */
+  .subs-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .sub-card {
+    background: var(--bg2);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    transition: all var(--transition);
+  }
+  .sub-card:hover { border-color: var(--border-hover); }
+
+  .sub-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-bottom: 8px;
   }
-  .card-title .badge {
-    background: var(--bg3);
-    color: var(--text2);
-    font-size: 0.65rem;
-    padding: 2px 6px;
+  .sub-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .sub-brand {
+    font-size: 0.6rem;
+    padding: 2px 7px;
     border-radius: 4px;
-    font-weight: 500;
+    font-weight: 600;
+  }
+  .sub-brand.anthropic { background: var(--orange-dim); color: var(--orange); }
+  .sub-brand.openai { background: var(--green-dim); color: var(--green); }
+  .sub-brand.google { background: rgba(88,166,255,0.1); color: var(--blue); }
+  .sub-brand.openrouter { background: var(--purple-dim); color: var(--purple); }
+
+  .sub-price {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .sub-detail {
+    font-size: 0.7rem;
+    color: var(--text3);
+  }
+  .sub-credit {
+    margin-top: 6px;
+    font-size: 0.75rem;
+    color: var(--text2);
+  }
+  .sub-credit-bar {
+    height: 4px;
+    background: var(--bg3);
+    border-radius: 2px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+  .sub-credit-fill {
+    height: 100%; border-radius: 2px;
+  }
+  .sub-credit-fill.orange { background: var(--orange); }
+
+  /* ── USAGE SECTION ── */
+  .usage-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
   }
 
-  .col-12 { grid-column: span 12; }
-  .col-6 { grid-column: span 6; }
-  .col-4 { grid-column: span 4; }
-  .col-3 { grid-column: span 3; }
+  .usage-card {
+    background: var(--bg2);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    transition: all var(--transition);
+  }
+  .usage-card:hover { border-color: var(--border-hover); }
+  .usage-card.full { /* card for 2-column or full-width if needed */ }
 
-  .empty-state { text-align: center; padding: 24px 8px; color: var(--text2); font-size: 0.85rem; }
-  .empty-state .icon { font-size: 1.5rem; margin-bottom: 4px; opacity: 0.5; }
+  .usage-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .usage-model {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .usage-model .brand-tag {
+    font-size: 0.6rem;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .brand-tag.anthropic { background: var(--orange-dim); color: var(--orange); }
+  .brand-tag.openai { background: var(--green-dim); color: var(--green); }
+  .brand-tag.openrouter { background: var(--purple-dim); color: var(--purple); }
 
-  .health-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 6px 0; border-bottom: 1px solid var(--bg3); font-size: 0.85rem;
-  }
-  .health-row:last-child { border-bottom: none; }
-  .health-label { color: var(--text2); }
-  .health-value { font-weight: 600; font-variant-numeric: tabular-nums; }
-
-  .stat-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
-  }
-  .stat-box {
-    background: var(--bg3); border-radius: 6px; padding: 10px 8px; text-align: center;
-  }
-  .stat-number {
-    font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--blue);
-  }
-  .stat-number.green { color: var(--green); }
-  .stat-number.yellow { color: var(--yellow); }
-  .stat-number.purple { color: var(--purple); }
-  .stat-number.cyan { color: var(--cyan); }
-  .stat-number.orange { color: var(--orange); }
-  .stat-label { font-size: 0.65rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
-
-  .bar-chart { margin-top: 4px; }
-  .bar-row {
-    display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-size: 0.75rem;
-  }
-  .bar-label {
-    width: 60px; flex-shrink: 0; text-align: right; color: var(--text2); font-size: 0.7rem;
-  }
-  .bar-track { flex: 1; height: 14px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
-  .bar-fill { height: 100%; border-radius: 3px; transition: width var(--transition); min-width: 2px; }
-  .bar-fill.blue { background: linear-gradient(90deg, #1f6feb, var(--blue)); }
-  .bar-fill.green { background: linear-gradient(90deg, #238636, var(--green)); }
-  .bar-fill.cyan { background: linear-gradient(90deg, #1a7f72, var(--cyan)); }
-  .bar-fill.orange { background: linear-gradient(90deg, #9b5100, var(--orange)); }
-  .bar-fill.purple { background: linear-gradient(90deg, #512b8a, var(--purple)); }
-  .bar-value { width: 44px; flex-shrink: 0; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; font-size: 0.7rem; }
-
-  .insight-item {
-    padding: 8px 0; border-bottom: 1px solid var(--bg3); font-size: 0.8rem;
-  }
-  .insight-item:last-child { border-bottom: none; }
-  .insight-header { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
-  .insight-title { font-weight: 600; }
-  .insight-type {
-    font-size: 0.6rem; padding: 1px 5px; border-radius: 3px;
-    background: var(--bg3); color: var(--text2); text-transform: uppercase;
-  }
-  .insight-desc { color: var(--text2); font-size: 0.75rem; }
-  .insight-status {
-    display: inline-block; font-size: 0.6rem; padding: 1px 5px; border-radius: 3px; background: var(--bg3);
-  }
-  .insight-status.done { background: #1a3a2a; color: var(--green); }
-  .insight-status.pending { background: #3a2a1a; color: var(--yellow); }
-
-  .skill-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 5px 0; border-bottom: 1px solid var(--bg3); font-size: 0.8rem;
-  }
-  .skill-row:last-child { border-bottom: none; }
-  .skill-name { color: var(--cyan); font-weight: 500; }
-  .skill-count {
-    background: var(--bg3); padding: 1px 6px; border-radius: 4px;
-    font-size: 0.7rem; font-weight: 600; font-variant-numeric: tabular-nums;
+  .usage-gauge-row {
+    display: flex;
+    gap: 16px;
+    align-items: center;
   }
 
-  .session-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 5px 0; border-bottom: 1px solid var(--bg3); font-size: 0.78rem;
+  /* ── CIRCULAR GAUGE ── */
+  .gauge-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
   }
-  .session-row:last-child { border-bottom: none; }
-  .session-id {
-    font-family: "SF Mono", "Fira Code", monospace;
-    font-size: 0.7rem; color: var(--text2);
-    max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  .gauge-svg {
+    width: 64px;
+    height: 64px;
+    transform: rotate(-90deg);
   }
-  .session-meta { color: var(--text2); font-size: 0.7rem; }
-  .session-model {
-    background: var(--bg3); padding: 1px 5px; border-radius: 3px; font-size: 0.65rem;
+  .gauge-bg { fill: none; stroke: var(--bg3); stroke-width: 5; }
+  .gauge-fill { fill: none; stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 0.5s ease; }
+  .gauge-fill.orange { stroke: var(--orange); }
+  .gauge-fill.green { stroke: var(--green); }
+  .gauge-fill.purple { stroke: var(--purple); }
+  .gauge-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-top: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+  .gauge-label.orange { color: var(--orange); }
+  .gauge-label.green { color: var(--green); }
+
+  .usage-bars {
+    flex: 1;
+    min-width: 0;
+  }
+  .usage-bar-item {
+    margin-bottom: 8px;
+  }
+  .usage-bar-item:last-child { margin-bottom: 0; }
+  .usage-bar-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: var(--text2);
+    margin-bottom: 3px;
+  }
+  .usage-bar-header .val { color: var(--text); font-weight: 600; }
+  .usage-bar-track {
+    height: 8px;
+    background: var(--bg3);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .usage-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+  .usage-bar-fill.orange { background: linear-gradient(90deg, #9b5100, var(--orange)); }
+  .usage-bar-fill.green { background: linear-gradient(90deg, #238636, var(--green)); }
+  .usage-bar-fill.over { background: linear-gradient(90deg, var(--orange), var(--red)); }
+
+  .usage-time {
+    font-size: 0.65rem;
+    color: var(--text3);
+    text-align: right;
+    flex-shrink: 0;
+    margin-left: 8px;
   }
 
-  @media (max-width: 900px) {
-    .col-3, .col-4, .col-6 { grid-column: span 12; }
-    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .usage-credit-info {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    font-size: 0.75rem;
+    color: var(--text2);
+    display: flex;
+    justify-content: space-between;
   }
-  @media (max-width: 600px) {
-    .stat-grid { grid-template-columns: 1fr 1fr; }
-    .header { flex-direction: column; align-items: flex-start; }
+  .usage-credit-info .val { color: var(--text); font-weight: 600; }
+
+  /* ── RESPONSIVE ── */
+
+  /* Tablet / narrow desktop */
+  @media (max-width: 1100px) {
+    .subs-row { grid-template-columns: repeat(2, 1fr); }
+    .usage-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* Medium */
+  @media (max-width: 860px) {
+    .metrics-row { grid-template-columns: repeat(2, 1fr); }
+    .metrics-row > *:last-child { grid-column: span 2; }
+    .usage-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Mobile: collapse sidebar into top bar */
+  @media (max-width: 700px) {
+    body { flex-direction: column; }
+
+    .sidebar {
+      width: 100%;
+      min-height: auto;
+      height: auto;
+      position: relative;
+      flex-direction: row;
+      flex-wrap: wrap;
+      padding: 8px 14px;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+    }
+    .sidebar-logo {
+      border-bottom: none;
+      padding: 0;
+      margin-right: 16px;
+    }
+    .sidebar-nav {
+      display: flex;
+      flex-direction: row;
+      padding: 0;
+      gap: 4px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+    .nav-section { display: none; }
+    .nav-item { padding: 5px 10px; font-size: 0.78rem; }
+    .agent-btn { padding: 5px 10px; font-size: 0.75rem; }
+    .sidebar-footer { display: none; }
+
+    .topbar { padding: 10px 14px; }
+    .content { padding: 14px; }
+
+    .metrics-row { grid-template-columns: 1fr; }
+    .metrics-row > *:last-child { grid-column: span 1; }
+    .subs-row { grid-template-columns: 1fr; }
+    .usage-grid { grid-template-columns: 1fr; }
+
+    .search-box { min-width: auto; flex: 1; }
+    .search-box .key-hint { display: none; }
+  }
+
+  /* Tiny mobile */
+  @media (max-width: 450px) {
+    .section-tabs { display: none; }
+    .section-summary { flex-direction: column; gap: 4px; }
+    .topbar { flex-direction: column; align-items: stretch; }
+    .topbar-right { justify-content: flex-end; }
+    .usage-gauge-row { flex-direction: column; align-items: stretch; }
+    .gauge-wrap { flex-direction: row; gap: 12px; }
+    .gauge-svg { width: 48px; height: 48px; }
   }
 </style>
 </head>
 <body>
-<div class="header">
-  <h1><span class="logo">◆</span> AI-OS Dashboard <span style="font-size:0.7rem;color:var(--text2);font-weight:400">UI Preview</span></h1>
-  <div class="header-status">
-    <span><span class="status-dot green" id="headerStatusDot"></span> <span id="headerStatusText">Healthy</span></span>
-    <span>⏱ <span id="headerUptime">12h 34m 12s</span></span>
-    <span class="last-refresh" id="headerRefresh">Sample data — not live</span>
+
+<!-- ─── SIDEBAR ─── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-symbol">◆</span>
+    AI-OS
   </div>
-</div>
-<div class="container">
-  <div class="grid" id="dashboardGrid"></div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">Main</div>
+    <div class="nav-item active"><span class="icon">🏠</span> Home</div>
+    <div class="nav-item"><span class="icon">⚡</span> Skills</div>
+    <div class="nav-item"><span class="icon">🧠</span> Memory</div>
+    <div class="nav-item"><span class="icon">📊</span> Activity</div>
+
+    <div class="nav-section">Agents</div>
+    <div class="agent-btn hermes"><span>◆</span> Hermes Agent</div>
+    <div class="agent-btn openclaw"><span>◈</span> OpenClaw</div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-preview">
+      <span class="dot"></span>
+      <span>Local daemon<br>connected</span>
+    </div>
+  </div>
+</aside>
+
+<!-- ─── MAIN ─── -->
+<div class="main">
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="status-dot"></span>
+      <span>Hermes Agent / <span style="color:var(--text)">q</span></span>
+      <span class="status-text">· Local daemon connected</span>
+    </div>
+    <div class="topbar-right">
+      <div class="search-box">
+        <span style="opacity:0.4">🔍</span>
+        <span style="flex:1">Search workspaces, skills...</span>
+        <span class="key-hint">⌘K</span>
+      </div>
+      <div class="icon-btn">🔔</div>
+      <div class="avatar">Q</div>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Page Title -->
+    <div class="page-title">
+      OPERATOR — Q
+      <span class="sub">: Today at a glance</span>
+    </div>
+
+    <!-- Metric Cards -->
+    <div class="metrics-row" id="metricsRow">
+      <div class="metric-card">
+        <div class="metric-label">Spent on AI</div>
+        <div class="metric-value orange" id="metricSpent">$12.47</div>
+        <div class="metric-footer">
+          <span id="spentChange">↑ 12.3%</span>
+          <span style="color:var(--text3)">last 28 days</span>
+        </div>
+        <div class="metric-sparkline" id="sparkSpent"></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Skills Saved</div>
+        <div class="metric-value green" id="metricSaved">$8,240</div>
+        <div class="metric-footer">
+          <span id="savedChange">↑ 43.2h of work avoided</span>
+        </div>
+        <div class="metric-sparkline" id="sparkSaved"></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Net ROI</div>
+        <div class="metric-value purple" id="metricROI">+$8,228</div>
+        <div class="metric-footer">
+          <span id="roiChange">659x return on AI spend</span>
+        </div>
+        <div class="metric-sparkline" id="sparkROI"></div>
+      </div>
+    </div>
+
+    <!-- Subscriptions -->
+    <div class="section-header">
+      <div class="section-title">💰 Subscriptions & Spend</div>
+      <div class="section-tabs">
+        <span class="section-tab active">Subscriptions</span>
+        <span class="section-tab">Tokens</span>
+        <span class="section-tab">API-Equivalent</span>
+      </div>
+    </div>
+
+    <div class="section-summary">
+      <span>Flat monthly spend: <strong>$240</strong></span>
+      <span>Tokens used: <strong>$12.47</strong></span>
+      <span>ROI: <strong style="color:var(--purple)">659x</strong></span>
+    </div>
+
+    <div class="subs-row" id="subsRow">
+      <div class="sub-card">
+        <div class="sub-header">
+          <span class="sub-name">DeepSeek V4 Flash</span>
+          <span class="sub-brand anthropic">DeepSeek</span>
+        </div>
+        <div class="sub-price">Free</div>
+        <div class="sub-detail">Pay-as-you-go API</div>
+        <div class="sub-credit">
+          <span>This month: <strong>$7.23</strong> of $10 budget</span>
+          <div class="sub-credit-bar"><div class="sub-credit-fill orange" style="width:72%"></div></div>
+        </div>
+      </div>
+      <div class="sub-card">
+        <div class="sub-header">
+          <span class="sub-name">Claude Sonnet 4</span>
+          <span class="sub-brand anthropic">Anthropic</span>
+        </div>
+        <div class="sub-price">$10.00</div>
+        <div class="sub-detail">Pay-as-you-go API</div>
+        <div class="sub-credit">
+          <span>This month: <strong>$2.41</strong> of $10 budget</span>
+          <div class="sub-credit-bar"><div class="sub-credit-fill orange" style="width:24%"></div></div>
+        </div>
+      </div>
+      <div class="sub-card">
+        <div class="sub-header">
+          <span class="sub-name">GPT-4o</span>
+          <span class="sub-brand openai">OpenAI</span>
+        </div>
+        <div class="sub-price">$0.00</div>
+        <div class="sub-detail">Pay-as-you-go API</div>
+        <div class="sub-credit">
+          <span>This month: <strong>$2.83</strong> of $5 budget</span>
+          <div class="sub-credit-bar"><div class="sub-credit-fill green" style="width:57%"></div></div>
+        </div>
+      </div>
+      <div class="sub-card">
+        <div class="sub-header">
+          <span class="sub-name">Gemini 2.5 Pro</span>
+          <span class="sub-brand google">Google</span>
+        </div>
+        <div class="sub-price">$0.00</div>
+        <div class="sub-detail">Free tier</div>
+        <div class="sub-credit">
+          <span>This month: <strong>$0.00</strong></span>
+          <div class="sub-credit-bar"><div class="sub-credit-fill" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Usage -->
+    <div class="section-header">
+      <div class="section-title">📈 Live Usage: Plan Limits & Windows</div>
+    </div>
+
+    <div class="usage-grid" id="usageGrid">
+      <!-- DeepSeek Card -->
+      <div class="usage-card">
+        <div class="usage-header">
+          <div class="usage-model">
+            <span>DeepSeek V4 Flash</span>
+            <span class="brand-tag anthropic">DeepSeek</span>
+          </div>
+        </div>
+        <div class="usage-gauge-row">
+          <div class="gauge-wrap">
+            <svg class="gauge-svg" viewBox="0 0 36 36">
+              <circle class="gauge-bg" cx="18" cy="18" r="15.5"/>
+              <circle class="gauge-fill orange" id="gaugeDS" cx="18" cy="18" r="15.5"
+                stroke-dasharray="97.4" stroke-dashoffset="0"/>
+            </svg>
+            <div class="gauge-label orange" id="gaugeDSLabel">0%</div>
+          </div>
+          <div class="usage-bars">
+            <div class="usage-bar-item">
+              <div class="usage-bar-header">
+                <span>Window 1 (8H)</span>
+                <span class="val" id="dsWindow1">0 / 5,000</span>
+              </div>
+              <div class="usage-bar-track"><div class="usage-bar-fill orange" id="dsBar1" style="width:0%"></div></div>
+            </div>
+            <div class="usage-bar-item">
+              <div class="usage-bar-header">
+                <span>Window 2 (WEEKLY)</span>
+                <span class="val" id="dsWindow2">0 / 20,000</span>
+              </div>
+              <div class="usage-bar-track"><div class="usage-bar-fill orange" id="dsBar2" style="width:0%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Claude Card -->
+      <div class="usage-card">
+        <div class="usage-header">
+          <div class="usage-model">
+            <span>Claude Sonnet 4</span>
+            <span class="brand-tag anthropic">Anthropic</span>
+          </div>
+        </div>
+        <div class="usage-gauge-row">
+          <div class="gauge-wrap">
+            <svg class="gauge-svg" viewBox="0 0 36 36">
+              <circle class="gauge-bg" cx="18" cy="18" r="15.5"/>
+              <circle class="gauge-fill orange" id="gaugeClaude" cx="18" cy="18" r="15.5"
+                stroke-dasharray="97.4" stroke-dashoffset="0"/>
+            </svg>
+            <div class="gauge-label orange" id="gaugeClaudeLabel">0%</div>
+          </div>
+          <div class="usage-bars">
+            <div class="usage-bar-item">
+              <div class="usage-bar-header">
+                <span>Window 1 (8H)</span>
+                <span class="val" id="claudeWindow1">0 / 3,000</span>
+              </div>
+              <div class="usage-bar-track"><div class="usage-bar-fill orange" id="claudeBar1" style="width:0%"></div></div>
+            </div>
+            <div class="usage-bar-item">
+              <div class="usage-bar-header">
+                <span>Window 2 (WEEKLY)</span>
+                <span class="val" id="claudeWindow2">0 / 10,000</span>
+              </div>
+              <div class="usage-bar-track"><div class="usage-bar-fill orange" id="claudeBar2" style="width:0%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GPT-4o Card -->
+      <div class="usage-card">
+        <div class="usage-header">
+          <div class="usage-model">
+            <span>GPT-4o</span>
+            <span class="brand-tag openai">OpenAI</span>
+          </div>
+        </div>
+        <div class="usage-gauge-row">
+          <div class="gauge-wrap">
+            <svg class="gauge-svg" viewBox="0 0 36 36">
+              <circle class="gauge-bg" cx="18" cy="18" r="15.5"/>
+              <circle class="gauge-fill green" id="gaugeGPT" cx="18" cy="18" r="15.5"
+                stroke-dasharray="97.4" stroke-dashoffset="97.4"/>
+            </svg>
+            <div class="gauge-label green" id="gaugeGPTLabel">0%</div>
+          </div>
+          <div class="usage-bars">
+            <div class="usage-bar-item">
+              <div class="usage-bar-header">
+                <span>Window 1 (8H)</span>
+                <span class="val" id="gptWindow1">0 / 2,000</span>
+              </div>
+              <div class="usage-bar-track"><div class="usage-bar-fill green" id="gptBar1" style="width:0%"></div></div>
+            </div>
+            <div class="usage-bar-item">
+              <div class="usage-bar-header">
+                <span>Window 2 (WEEKLY)</span>
+                <span class="val" id="gptWindow2">0 / 7,500</span>
+              </div>
+              <div class="usage-bar-track"><div class="usage-bar-fill green" id="gptBar2" style="width:0%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Links / Footer meta -->
+    <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text3);padding:8px 0 0;border-top:1px solid var(--border);margin-top:8px;flex-wrap:wrap;gap:8px">
+      <span>Last updated: <span id="lastUpdated">—</span></span>
+      <span>◆ AI-OS Dashboard · UI Preview with sample data</span>
+    </div>
+
+  </div>
 </div>
 
 <script>
-// ── Helpers ────────────────────────────────────────────────────────────
-
-function $(id) { return document.getElementById(id); }
-
-function escapeHtml(s) {
-  if (s == null) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+// ── Sparkline generator ──
+function renderSpark(containerId, values, colorClass) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const max = Math.max(...values, 1);
+  const bars = values.map(v => {
+    const h = Math.max((v / max) * 22, 2);
+    return `<div class="spark-bar ${colorClass}" style="height:${h}px"></div>`;
+  }).join('');
+  el.innerHTML = bars;
 }
 
-function truncate(s, n) {
-  if (!s) return '';
-  return s.length > n ? s.slice(0, n) + '…' : s;
+// ── Circular gauge setter ──
+function setGauge(gaugeId, labelId, pct, colorClass) {
+  const gauge = document.getElementById(gaugeId);
+  const label = document.getElementById(labelId);
+  if (!gauge || !label) return;
+  const circumference = 2 * Math.PI * 15.5; // ~97.4
+  const offset = circumference - (pct / 100) * circumference;
+  gauge.setAttribute('stroke-dasharray', circumference);
+  gauge.setAttribute('stroke-dashoffset', offset);
+  label.textContent = Math.round(pct) + '%';
 }
 
-function formatNumber(n) {
-  if (n == null) return '0';
-  n = Number(n);
-  if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
-  if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
-  return n.toLocaleString();
+// ── Bar setter ──
+function setBar(barId, used, limit) {
+  const el = document.getElementById(barId);
+  if (!el) return;
+  const pct = limit > 0 ? Math.min((used / limit) * 100, 100) : 0;
+  el.style.width = pct + '%';
+  if (used > limit) el.classList.add('over');
 }
 
-function timeAgo(iso) {
-  if (!iso) return '—';
-  const then = new Date(iso);
-  const now = new Date();
-  const diff = (now - then) / 1000;
-  if (diff < 60) return 'just now';
-  if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
-  if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
-  const days = Math.floor(diff / 86400);
-  return days + 'd ago';
-}
-
-function shortId(sid) {
-  if (!sid) return '—';
-  return sid.length > 12 ? sid.slice(0, 8) + '…' : sid;
-}
-
-// ── Card Builder ───────────────────────────────────────────────────────
-
-function makeCard(id, title, cols, badge) {
-  const div = document.createElement('div');
-  div.className = 'card ' + cols;
-  div.id = id;
-  const header = document.createElement('div');
-  header.className = 'card-title';
-  header.innerHTML = '<span>' + escapeHtml(title) + '</span>' +
-    (badge ? '<span class="badge">' + escapeHtml(badge) + '</span>' : '');
-  div.appendChild(header);
-  const body = document.createElement('div');
-  body.className = 'card-body';
-  div.appendChild(body);
-  return div;
-}
-
-function setCardBody(id, html) {
-  const card = $(id);
-  if (!card) return;
-  const body = card.querySelector('.card-body');
-  if (body) body.innerHTML = html;
-}
-
-// ── MOCK DATA ──────────────────────────────────────────────────────────
-
+// ── Mock data ──
 const MOCK = {
-  status: {
-    status: "green",
-    uptime_human: "12h 34m 12s",
-    sessions_today: 24,
-    database: {
-      total_sessions: 847,
-      total_skills: 32,
-      total_insights: 47,
-      total_memories: 156,
-      total_agents: 7,
-      total_patterns: 18,
-      total_tool_calls: 12453,
-      db_size_mb: 4.7
-    }
-  },
-  analytics: [
-    { date: "05-26", total_tokens_input: 285000, total_tokens_output: 92000, total_cost: 0.87 },
-    { date: "05-25", total_tokens_input: 312000, total_tokens_output: 105000, total_cost: 0.95 },
-    { date: "05-24", total_tokens_input: 198000, total_tokens_output: 64000, total_cost: 0.61 },
-    { date: "05-23", total_tokens_input: 445000, total_tokens_output: 152000, total_cost: 1.34 },
-    { date: "05-22", total_tokens_input: 367000, total_tokens_output: 121000, total_cost: 1.12 },
-    { date: "05-21", total_tokens_input: 289000, total_tokens_output: 98000, total_cost: 0.89 },
-    { date: "05-20", total_tokens_input: 156000, total_tokens_output: 51000, total_cost: 0.48 },
-    { date: "05-19", total_tokens_input: 423000, total_tokens_output: 148000, total_cost: 1.28 },
-    { date: "05-18", total_tokens_input: 378000, total_tokens_output: 135000, total_cost: 1.18 },
-    { date: "05-17", total_tokens_input: 201000, total_tokens_output: 72000, total_cost: 0.64 },
-    { date: "05-16", total_tokens_input: 334000, total_tokens_output: 118000, total_cost: 1.05 },
-    { date: "05-15", total_tokens_input: 412000, total_tokens_output: 142000, total_cost: 1.24 },
-    { date: "05-14", total_tokens_input: 275000, total_tokens_output: 89000, total_cost: 0.83 },
-    { date: "05-13", total_tokens_input: 189000, total_tokens_output: 58000, total_cost: 0.56 }
-  ],
-  insights: [
-    { id: 1, insight_type: "optimization", title: "Reduce daily token spend via prompt caching", description: "Implementing prompt caching could reduce input tokens by 30-40% for repeated system prompts", confidence: 0.85, implemented: false, created_at: "2026-05-26T08:00:00Z" },
-    { id: 2, insight_type: "milestone", title: "AI-OS v1.0.0 foundation built", description: "Core architecture: config, database, dreaming, analytics, dashboard, agent registry", confidence: 1.0, implemented: true, created_at: "2026-05-26T06:00:00Z" },
-    { id: 3, insight_type: "pattern", title: "DandAIs-World dev sessions cluster at night", description: "80% of game development sessions start between 10 PM and 3 AM PT", confidence: 0.92, implemented: false, created_at: "2026-05-25T22:00:00Z" },
-    { id: 4, insight_type: "recommendation", title: "Add automated code review to pre-commit hooks", description: "Running review-agent before push would catch 3 common bug patterns seen in the last week", confidence: 0.78, implemented: false, created_at: "2026-05-25T16:00:00Z" },
-    { id: 5, insight_type: "optimization", title: "Consolidate workspace project folders", description: "3 stale copies of DandAIs-World exist — reduce to single source of truth", confidence: 0.88, implemented: false, created_at: "2026-05-25T14:00:00Z" },
-    { id: 6, insight_type: "pattern", title: "Tailscale ACL blocks dashboard access", description: "tag:ai-server ACL rule prevents remote access to port 9199 — needs admin panel fix", confidence: 0.95, implemented: false, created_at: "2026-05-25T10:00:00Z" },
-    { id: 7, insight_type: "recommendation", title: "Switch chat-llm to 1B+ model for personas", description: "SmolLM-135M fundamentally lacks capacity for persona roleplay — recommend Qwen2.5-1.5B", confidence: 0.82, implemented: false, created_at: "2026-05-24T20:00:00Z" },
-    { id: 8, insight_type: "milestone", title: "Morning Brief system deployed successfully", description: "First automated brief delivered May 26 at 8 AM PT with Dreaming → Brief chained pipeline", confidence: 1.0, implemented: true, created_at: "2026-05-26T08:01:00Z" }
-  ],
-  skills: [
-    { skill_name: "writing-plans", times_loaded: 47, avg_duration_s: 12 },
-    { skill_name: "github-pr-workflow", times_loaded: 38, avg_duration_s: 8 },
-    { skill_name: "test-driven-development", times_loaded: 31, avg_duration_s: 15 },
-    { skill_name: "systematic-debugging", times_loaded: 28, avg_duration_s: 22 },
-    { skill_name: "frontend-design", times_loaded: 24, avg_duration_s: 18 },
-    { skill_name: "unity-development", times_loaded: 22, avg_duration_s: 35 },
-    { skill_name: "notebooklm", times_loaded: 19, avg_duration_s: 5 },
-    { skill_name: "obsidian", times_loaded: 18, avg_duration_s: 4 },
-    { skill_name: "morning-brief-system", times_loaded: 16, avg_duration_s: 3 },
-    { skill_name: "claude-code", times_loaded: 15, avg_duration_s: 45 },
-    { skill_name: "excalidraw", times_loaded: 13, avg_duration_s: 28 },
-    { skill_name: "codex", times_loaded: 12, avg_duration_s: 40 },
-    { skill_name: "decision-journal", times_loaded: 10, avg_duration_s: 6 },
-    { skill_name: "web-search", times_loaded: 9, avg_duration_s: 5 },
-    { skill_name: "plan", times_loaded: 8, avg_duration_s: 20 }
-  ],
-  sessions: [
-    { session_id: "20260526_080129_d3191a", source: "cron", model: "deepseek/deepseek-v4-flash:free", started_at: "2026-05-26T15:01:29Z", status: "completed", tokens_input: 4520, tokens_output: 2100, estimated_cost: 0.0032 },
-    { session_id: "20260526_060041_cron_dr", source: "cron", model: "deepseek/deepseek-v4-flash:free", started_at: "2026-05-26T13:00:41Z", status: "completed", tokens_input: 12800, tokens_output: 4600, estimated_cost: 0.0087 },
-    { session_id: "20260526_043946_ccf452", source: "telegram", model: "deepseek/deepseek-v4-flash:free", started_at: "2026-05-26T11:39:46Z", status: "completed", tokens_input: 8450, tokens_output: 3200, estimated_cost: 0.0058 },
-    { session_id: "20260526_033209_f7d1b9", source: "telegram", model: "deepseek/deepseek-v4-flash:free", started_at: "2026-05-26T10:32:09Z", status: "completed", tokens_input: 22100, tokens_output: 7800, estimated_cost: 0.0149 },
-    { session_id: "20260525_220110_a1b2c3", source: "telegram", model: "anthropic/claude-sonnet-4", started_at: "2026-05-26T05:01:10Z", status: "completed", tokens_input: 18400, tokens_output: 6200, estimated_cost: 0.37 },
-    { session_id: "20260525_180000_d4e5f6", source: "telegram", model: "openai/gpt-4o", started_at: "2026-05-26T01:00:00Z", status: "completed", tokens_input: 9800, tokens_output: 4100, estimated_cost: 0.22 },
-    { session_id: "20260525_140000_g7h8i9", source: "telegram", model: "deepseek/deepseek-v4-flash:free", started_at: "2026-05-25T21:00:00Z", status: "completed", tokens_input: 6200, tokens_output: 2800, estimated_cost: 0.0045 },
-    { session_id: "20260525_093000_j0k1l2", source: "telegram", model: "anthropic/claude-sonnet-4", started_at: "2026-05-25T16:30:00Z", status: "completed", tokens_input: 15600, tokens_output: 5400, estimated_cost: 0.31 },
-    { session_id: "20260524_220000_m3n4o5", source: "telegram", model: "deepseek/deepseek-v4-flash:free", started_at: "2026-05-25T05:00:00Z", status: "completed", tokens_input: 3400, tokens_output: 1200, estimated_cost: 0.0023 },
-    { session_id: "20260524_150000_p6q7r8", source: "telegram", model: "openai/gpt-4o", started_at: "2026-05-24T22:00:00Z", status: "completed", tokens_input: 21500, tokens_output: 8900, estimated_cost: 0.48 }
-  ],
-  patterns: [
-    { pattern_type: "Late Night Dev Sprint", description: "Game dev sessions clustering 10PM-3AM PT after work hours", frequency: 14, estimated_savings_per_hour: 25 },
-    { pattern_type: "Morning Review Loop", description: "Reviewing AI-OS stats first thing after waking up", frequency: 11, estimated_savings_per_hour: 10 },
-    { pattern_type: "Cron Job Cascade", description: "Chained cron jobs: Dreaming → Brief → Decision → Wrap", frequency: 8, estimated_savings_per_hour: 40 },
-    { pattern_type: "GitHub PR Workflow", description: "Branch → commit → open PR → CI → merge cycle", frequency: 7, estimated_savings_per_hour: 35 },
-    { pattern_type: "Code-First Push", description: "Direct code snippets via update_game.py, Git as fallback", frequency: 6, estimated_savings_per_hour: 30 },
-    { pattern_type: "Slime Agent Delegation", description: "Spawn dedicated sub-agents for specialized tasks", frequency: 5, estimated_savings_per_hour: 45 },
-    { pattern_type: "Evening Wrap + Prep", description: "Daily summary + next-day planning at 17:30/20:00", frequency: 4, estimated_savings_per_hour: 20 },
-    { pattern_type: "Stale Branch Cleanup", description: "Identifying and pruning unmerged git branches weekly", frequency: 3, estimated_savings_per_hour: 15 },
-    { pattern_type: "Cross-Project Context Sync", description: "Fetching context from ai-os to inform game dev decisions", frequency: 3, estimated_savings_per_hour: 18 },
-    { pattern_type: "Tailscale Tunnel Debug", description: "Diagnosing network ACL issues for remote dashboard access", frequency: 2, estimated_savings_per_hour: 60 }
-  ],
-  tools: [
-    { tool_name: "terminal", calls: 2840, failures: 76, avg_duration_ms: 3400 },
-    { tool_name: "write_file", calls: 2130, failures: 12, avg_duration_ms: 120 },
-    { tool_name: "search_files", calls: 1670, failures: 8, avg_duration_ms: 850 },
-    { tool_name: "patch", calls: 1450, failures: 22, avg_duration_ms: 280 },
-    { tool_name: "read_file", calls: 1320, failures: 15, avg_duration_ms: 95 },
-    { tool_name: "web_search", calls: 980, failures: 45, avg_duration_ms: 2100 },
-    { tool_name: "session_search", calls: 760, failures: 3, avg_duration_ms: 180 },
-    { tool_name: "memory", calls: 640, failures: 0, avg_duration_ms: 60 },
-    { tool_name: "skill_view", calls: 520, failures: 2, avg_duration_ms: 150 },
-    { tool_name: "cronjob", calls: 410, failures: 5, avg_duration_ms: 500 },
-    { tool_name: "delegate_task", calls: 380, failures: 18, avg_duration_ms: 45000 },
-    { tool_name: "vision_analyze", calls: 290, failures: 4, avg_duration_ms: 3200 },
-    { tool_name: "clarify", calls: 210, failures: 0, avg_duration_ms: 800 },
-    { tool_name: "send_message", calls: 180, failures: 6, avg_duration_ms: 450 },
-    { tool_name: "execute_code", calls: 145, failures: 11, avg_duration_ms: 12000 }
-  ]
+  spent: { value: 12.47, change: '+12.3%', spark: [3,5,4,7,9,6,8,11,10,12,9,11,13,12] },
+  saved: { value: 8240, change: '43.2h of work avoided', spark: [1200,1800,2400,2100,3200,2800,4100,3800,5200,4800,6100,5800,7200,8240] },
+  roi: { value: 8228, multiplier: '659x', spark: [800,1200,1800,1500,2500,2200,3500,3200,4800,4200,5800,5200,6800,8228] },
+  // Usage: cumulative tokens (thousands)
+  usage: {
+    deepseek:   { window1: { used: 2100, limit: 5000 }, window2: { used: 8400, limit: 20000 }, gauge: 24 },
+    claude:     { window1: { used: 1800, limit: 3000 }, window2: { used: 6200, limit: 10000 }, gauge: 42 },
+    gpt4:       { window1: { used: 420,  limit: 2000 }, window2: { used: 1900, limit: 7500 },  gauge: 0 }
+  }
 };
 
-// ── Card Renderers ─────────────────────────────────────────────────────
+// ── Populate ──
+function init() {
+  // Metrics
+  document.getElementById('metricSpent').textContent = '$' + MOCK.spent.value.toFixed(2);
+  document.getElementById('spentChange').textContent = MOCK.spent.change;
+  document.getElementById('metricSaved').textContent = '$' + MOCK.saved.value.toLocaleString();
+  document.getElementById('savedChange').textContent = MOCK.saved.change;
+  document.getElementById('metricROI').textContent = '+$' + MOCK.roi.value.toLocaleString();
+  document.getElementById('roiChange').textContent = MOCK.roi.multiplier + ' return on AI spend';
 
-function renderSystemHealth() {
-  const d = MOCK.status;
-  const db = d.database;
-  setCardBody('card-health', [
-    '<div class="health-row"><span class="health-label">Status</span><span class="health-value">' +
-      '<span class="status-dot green" style="vertical-align:middle;margin-right:4px"></span> Healthy</span></div>',
-    '<div class="health-row"><span class="health-label">Sessions Today</span><span class="health-value">' + d.sessions_today + '</span></div>',
-    '<div class="health-row"><span class="health-label">Uptime</span><span class="health-value">' + d.uptime_human + '</span></div>',
-    '<div class="health-row"><span class="health-label">DB Size</span><span class="health-value">' + db.db_size_mb + ' MB</span></div>',
-    '<div class="health-row"><span class="health-label">Active Agents</span><span class="health-value">' + db.total_agents + '</span></div>',
-    '<div class="health-row"><span class="health-label">Tool Calls</span><span class="health-value">' + formatNumber(db.total_tool_calls) + '</span></div>',
-    '<div class="health-row"><span class="health-label">Memories</span><span class="health-value">' + db.total_memories + '</span></div>',
-  ].join(''));
+  // Sparklines
+  renderSpark('sparkSpent', MOCK.spent.spark.slice(-14), 'orange');
+  renderSpark('sparkSaved', MOCK.saved.spark.slice(-14), 'green');
+  renderSpark('sparkROI', MOCK.roi.spark.slice(-14), 'purple');
+
+  // DeepSeek usage
+  const ds = MOCK.usage.deepseek;
+  setGauge('gaugeDS', 'gaugeDSLabel', ds.gauge, 'orange');
+  document.getElementById('dsWindow1').textContent = ds.window1.used.toLocaleString() + ' / ' + ds.window1.limit.toLocaleString();
+  document.getElementById('dsWindow2').textContent = ds.window2.used.toLocaleString() + ' / ' + ds.window2.limit.toLocaleString();
+  setBar('dsBar1', ds.window1.used, ds.window1.limit);
+  setBar('dsBar2', ds.window2.used, ds.window2.limit);
+
+  // Claude usage
+  const cl = MOCK.usage.claude;
+  setGauge('gaugeClaude', 'gaugeClaudeLabel', cl.gauge, 'orange');
+  document.getElementById('claudeWindow1').textContent = cl.window1.used.toLocaleString() + ' / ' + cl.window1.limit.toLocaleString();
+  document.getElementById('claudeWindow2').textContent = cl.window2.used.toLocaleString() + ' / ' + cl.window2.limit.toLocaleString();
+  setBar('claudeBar1', cl.window1.used, cl.window1.limit);
+  setBar('claudeBar2', cl.window2.used, cl.window2.limit);
+
+  // GPT-4o usage
+  const gpt = MOCK.usage.gpt4;
+  setGauge('gaugeGPT', 'gaugeGPTLabel', gpt.gauge, 'green');
+  document.getElementById('gptWindow1').textContent = gpt.window1.used.toLocaleString() + ' / ' + gpt.window1.limit.toLocaleString();
+  document.getElementById('gptWindow2').textContent = gpt.window2.used.toLocaleString() + ' / ' + gpt.window2.limit.toLocaleString();
+  setBar('gptBar1', gpt.window1.used, gpt.window1.limit);
+  setBar('gptBar2', gpt.window2.used, gpt.window2.limit);
+
+  // Timestamp
+  const now = new Date();
+  document.getElementById('lastUpdated').textContent = now.toLocaleString();
 }
 
-function renderQuickStats() {
-  const db = MOCK.status.database;
-  setCardBody('card-stats', [
-    '<div class="stat-grid">',
-    '  <div class="stat-box"><div class="stat-number green">' + MOCK.status.sessions_today + '</div><div class="stat-label">Sessions Today</div></div>',
-    '  <div class="stat-box"><div class="stat-number">' + formatNumber(db.total_sessions) + '</div><div class="stat-label">Total Sessions</div></div>',
-    '  <div class="stat-box"><div class="stat-number purple">' + db.total_insights + '</div><div class="stat-label">Insights</div></div>',
-    '  <div class="stat-box"><div class="stat-number cyan">' + db.total_skills + '</div><div class="stat-label">Skills</div></div>',
-    '  <div class="stat-box"><div class="stat-number yellow">' + db.total_patterns + '</div><div class="stat-label">Patterns</div></div>',
-    '  <div class="stat-box"><div class="stat-number">' + db.total_memories + '</div><div class="stat-label">Memories</div></div>',
-    '  <div class="stat-box"><div class="stat-number">' + db.total_agents + '</div><div class="stat-label">Agents</div></div>',
-    '  <div class="stat-box"><div class="stat-number orange">' + formatNumber(db.total_tool_calls) + '</div><div class="stat-label">Tool Calls</div></div>',
-    '</div>'
-  ].join(''));
-}
-
-function renderCostUsage() {
-  const data = MOCK.analytics;
-  const maxTokens = Math.max(...data.map(d => d.total_tokens_input + d.total_tokens_output), 1);
-  const maxCost = Math.max(...data.map(d => d.total_cost), 0.001);
-
-  const tokenBars = data.map(d => {
-    const tokens = d.total_tokens_input + d.total_tokens_output;
-    const pct = (tokens / maxTokens * 100).toFixed(1);
-    return '<div class="bar-row">' +
-      '<span class="bar-label">' + escapeHtml(d.date) + '</span>' +
-      '<div class="bar-track"><div class="bar-fill blue" style="width:' + pct + '%"></div></div>' +
-      '<span class="bar-value">' + formatNumber(tokens) + '</span></div>';
-  }).join('');
-
-  const costBars = data.map(d => {
-    const pct = (d.total_cost / maxCost * 100).toFixed(1);
-    return '<div class="bar-row">' +
-      '<span class="bar-label">' + escapeHtml(d.date) + '</span>' +
-      '<div class="bar-track"><div class="bar-fill green" style="width:' + pct + '%"></div></div>' +
-      '<span class="bar-value">$' + d.total_cost.toFixed(2) + '</span></div>';
-  }).join('');
-
-  setCardBody('card-cost', [
-    '<div style="margin-bottom:8px;font-size:0.8rem;font-weight:600;color:var(--blue)">Token Usage (14 days)</div>',
-    '<div class="bar-chart">' + tokenBars + '</div>',
-    '<div style="margin:12px 0 8px;font-size:0.8rem;font-weight:600;color:var(--green)">Cost History</div>',
-    '<div class="bar-chart">' + costBars + '</div>',
-  ].join(''));
-}
-
-function renderInsights() {
-  const items = MOCK.insights.map(i => {
-    const cls = i.implemented ? 'done' : 'pending';
-    const txt = i.implemented ? '✅ Done' : '⏳ Pending';
-    return '<div class="insight-item">' +
-      '<div class="insight-header">' +
-      '  <span class="insight-title">' + escapeHtml(truncate(i.title, 60)) + '</span>' +
-      '  <span class="insight-type">' + escapeHtml(i.insight_type) + '</span>' +
-      '</div>' +
-      '<div class="insight-desc">' + escapeHtml(truncate(i.description, 80)) + '</div>' +
-      '<div style="margin-top:2px;display:flex;gap:6px;align-items:center;font-size:0.65rem;color:var(--text2)">' +
-      '  <span class="insight-status ' + cls + '">' + txt + '</span>' +
-      '  <span>' + (i.confidence != null ? 'conf: ' + i.confidence.toFixed(2) : '') + '</span>' +
-      '  <span>' + timeAgo(i.created_at) + '</span>' +
-      '</div></div>';
-  }).join('');
-  setCardBody('card-insights', items);
-}
-
-function renderSkills() {
-  const top = MOCK.skills;
-  const maxCount = Math.max(...top.map(s => s.times_loaded), 1);
-  const items = top.map(s => {
-    const pct = (s.times_loaded / maxCount * 100).toFixed(0);
-    return '<div class="skill-row">' +
-      '<span class="skill-name">' + escapeHtml(s.skill_name) + '</span>' +
-      '<div style="display:flex;align-items:center;gap:6px;flex:1;margin:0 8px">' +
-      '  <div style="height:6px;background:var(--bg3);border-radius:3px;flex:1;overflow:hidden">' +
-      '    <div style="height:100%;width:' + pct + '%;background:var(--cyan);border-radius:3px"></div>' +
-      '  </div></div>' +
-      '<span class="skill-count">' + s.times_loaded + '</span></div>';
-  }).join('');
-  setCardBody('card-skills', items);
-}
-
-function renderPatterns() {
-  const top = MOCK.patterns;
-  const maxFreq = Math.max(...top.map(p => p.frequency), 1);
-  const items = top.map(p => {
-    const pct = (p.frequency / maxFreq * 100).toFixed(0);
-    return '<div class="skill-row">' +
-      '<span style="color:var(--purple);font-weight:500">' + escapeHtml(p.pattern_type) + '</span>' +
-      '<div style="display:flex;align-items:center;gap:6px;flex:1;margin:0 8px">' +
-      '  <div style="height:6px;background:var(--bg3);border-radius:3px;flex:1;overflow:hidden">' +
-      '    <div style="height:100%;width:' + pct + '%;background:var(--purple);border-radius:3px"></div>' +
-      '  </div></div>' +
-      '<span class="skill-count">×' + p.frequency + '</span></div>' +
-      (p.description ? '<div style="font-size:0.7rem;color:var(--text2);padding:0 0 4px 0;margin-top:-2px">' + escapeHtml(truncate(p.description, 60)) + '</div>' : '');
-  }).join('');
-  setCardBody('card-patterns', items);
-}
-
-function renderSessions() {
-  const items = MOCK.sessions.map(s => {
-    const modelStr = s.model ? s.model : '—';
-    return '<div class="session-row">' +
-      '<div style="display:flex;flex-direction:column;gap:1px;min-width:0;flex:1">' +
-      '  <div class="session-id" title="' + escapeHtml(s.session_id) + '">' + escapeHtml(shortId(s.session_id)) + '</div>' +
-      '  <div class="session-meta">' + (s.source || '—') + ' · ' + timeAgo(s.started_at) + '</div></div>' +
-      '<div style="display:flex;align-items:center;gap:6px">' +
-      '  <span class="session-model">' + escapeHtml(truncate(modelStr, 16)) + '</span>' +
-      '  <span style="font-size:0.7rem;color:var(--text2)">' + (s.status === 'active' ? '🟢' : '✅') + '</span>' +
-      '</div></div>';
-  }).join('');
-  setCardBody('card-sessions', items);
-}
-
-function renderTools() {
-  const top = MOCK.tools;
-  const maxCalls = Math.max(...top.map(t => t.calls), 1);
-  const items = top.map(t => {
-    const pct = (t.calls / maxCalls * 100).toFixed(0);
-    const failPct = t.calls > 0 ? ((t.failures || 0) / t.calls * 100).toFixed(0) : 0;
-    return '<div class="skill-row">' +
-      '<span style="color:var(--orange);font-weight:500">' + escapeHtml(t.tool_name) + '</span>' +
-      '<div style="display:flex;align-items:center;gap:6px;flex:1;margin:0 8px">' +
-      '  <div style="height:6px;background:var(--bg3);border-radius:3px;flex:1;overflow:hidden">' +
-      '    <div style="height:100%;width:' + pct + '%;background:var(--orange);border-radius:3px"></div>' +
-      '  </div></div>' +
-      '<span class="skill-count" title="' + (t.failures || 0) + ' failures">' +
-        t.calls + (failPct > 0 && failPct > 0 ? ' <span style="color:var(--red)">⚠' + failPct + '%</span>' : '') +
-      '</span></div>';
-  }).join('');
-  setCardBody('card-tools', items);
-}
-
-// ── Build & Render ──────────────────────────────────────────────────────
-
-function buildCards() {
-  const grid = $('dashboardGrid');
-  const cards = [
-    ['card-health',  'System Health',     'col-3'],
-    ['card-stats',   'Quick Stats',       'col-9'],
-    ['card-cost',    'Cost & Usage',      'col-4'],
-    ['card-insights','Recent Insights',   'col-4'],
-    ['card-skills',  'Skill Usage',       'col-4'],
-    ['card-patterns','Active Patterns',   'col-4'],
-    ['card-sessions','Recent Sessions',   'col-4'],
-    ['card-tools',   'Tool Call Breakdown','col-4'],
-  ];
-  cards.forEach(([id, title, cols]) => {
-    grid.appendChild(makeCard(id, title, cols));
-  });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  buildCards();
-  renderSystemHealth();
-  renderQuickStats();
-  renderCostUsage();
-  renderInsights();
-  renderSkills();
-  renderPatterns();
-  renderSessions();
-  renderTools();
-});
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
